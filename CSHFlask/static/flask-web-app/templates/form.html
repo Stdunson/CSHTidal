@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/outputStyle.css') }}">
+</head>
+<body>
+    <h1>Enter Your Data</h1>
+    <form id="dataForm" action="{{ url_for('main.submit_form') }}" method="POST">
+        <div class="form-group">
+            <label for="degree">Degree:</label>
+            <input type="text" id="degree" name="degree" placeholder="Degree Type (e.g., B.S.)" required>
+        </div>
+        <div class="form-group">
+            <label for="major">Major:</label>
+            <input type="text" id="major" name="major" required>
+        </div>
+        <div class="form-group">
+            <label for="minor">Minor:</label>
+            <input type="text" id="minor" name="minor" placeholder="Optional">
+        </div>
+        <div class="form-group">
+            <label>What courses have you taken:</label>
+            <div id="courses">
+                <input type="text" name="course[]" placeholder="Course number (e.g., COMP 2310)">
+            </div>
+            <button type="button" id="addCourseButton">Add Course</button>
+            <button type="button" id="removeCourseButton">Remove Course</button>
+        </div>
+        <div class="form-group">
+            <label for="graduation">When do you plan to graduate:</label>
+            <input type="text" id="graduation" name="graduation" placeholder="Graduation Term (e.g., Spring 2025)" required>
+        </div>
+        <div class="form-group">
+            <label for="notes">Any other notes?</label>
+            <textarea id="notes" name="notes" rows="6" placeholder="Enter any additional information here"></textarea>
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('addCourseButton').addEventListener('click', function() {
+            const coursesDiv = document.getElementById('courses');
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.name = 'course[]';
+            newInput.placeholder = 'Course number (e.g., COMP 2310)';
+            coursesDiv.appendChild(newInput);
+        });
+        document.getElementById('removeCourseButton').addEventListener('click', function() {
+            const coursesDiv = document.getElementById('courses');
+            const inputs = coursesDiv.getElementsByTagName('input');
+            if (inputs.length > 1) {
+                coursesDiv.removeChild(inputs[inputs.length - 1]);
+            }
+        });
+    </script>
+</body>
+</html>

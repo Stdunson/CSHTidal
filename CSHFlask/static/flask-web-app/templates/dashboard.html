@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Degree Plan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/outputStyle.css') }}">
+</head>
+<body>
+    <h1>Your Degree Plan</h1>
+    <textarea readonly placeholder="Description of your degree plan, including recommended courses for each semester until graduation (e.g., Fall 2025, Spring 2026).">{{ response }}</textarea>
+    <p>Any questions, comments, or adjustments to be made?</p>
+    <form action="#" method="post">
+        <input type="text" placeholder="Type your message here and press Enter" onkeypress="return event.key !== 'Enter';">
+    </form>
+    <form action="{{ url_for('main.index') }}" method="get">
+        <button type = "submit">Quit</button>
+    </form>
+</body>
+</html>
