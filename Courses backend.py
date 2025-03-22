@@ -1,12 +1,16 @@
+import google.generativeai as genai
 import datetime
-from typing import List, Dict, Optional
-from google import genai, configure, Client, GenerativeModel
 import base64
+import os
+from typing import List, Dict, Optional
 
-GOOGLE_API_KEY = "AIzaSyDcp5yex9vqJtGyIlVF56_K9v9tkyGL2-A"
-configure(api_key=GOOGLE_API_KEY)
-model = GenerativeModel("gemini-pro")
-client = Client(api_key=GOOGLE_API_KEY)
+# Configure API Key
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=GOOGLE_API_KEY)
+
+# Use the correct model
+MODEL_NAME = "gemini-1.5-pro-latest"
+model = genai.GenerativeModel(MODEL_NAME)
 
 def pdf_to_base64(pdf_path: str) -> str:
     """Converts a PDF file to a base64 encoded string."""
@@ -19,7 +23,7 @@ def extract_course_data_from_pdf(pdf_path: str) -> Dict:
 
     prompt = """
     Extract the course data from the provided PDF. The PDF contains course information, including course names, descriptions, prerequisites, and credit hours.
-    Structure the data as a python dictionary. Each major should be a key, and for each major, there should be "required", "electives", "prerequisites", and "credit_hours" keys.
+    Structure the data as a Python dictionary. Each major should be a key, and for each major, include "required", "electives", "prerequisites", and "credit_hours" keys.
 
     Example structure:
     {
@@ -31,16 +35,15 @@ def extract_course_data_from_pdf(pdf_path: str) -> Dict:
         },
         "Mathematics": {...}
     }
-    Return only the python dictionary.
+    Return only the Python dictionary.
     """
 
-    response = client.models.generate_content(prompt, parts=[pdf_base64])
     try:
-        course_data = eval(response.text)
+        response = model.generate_content([prompt, pdf_base64])
+        course_data = eval(response.text)  # Be careful with eval; consider using `json.loads` if possible
         return course_data
-    except (SyntaxError, NameError, TypeError) as e:
+    except Exception as e:
         print(f"Error parsing Gemini response: {e}")
-        print(f"Gemini response: {response.text}")
         return {}
 
 def get_next_semester_courses(
@@ -53,7 +56,7 @@ def get_next_semester_courses(
     course_data: Dict
 ) -> Dict[str, List[str]]:
     """Determines the next semester's courses based on input."""
-
+    
     if major not in course_data:
         return {"error": f"Major '{major}' not found."}
 
@@ -75,15 +78,19 @@ def get_next_semester_courses(
             if total_hours >= 18:
                 break
 
-    if "min_hours" in notes.lower():  # Check for minimum hours request in notes
-        min_hours = int(notes.lower().split("min_hours:")[1].split()[0]) #extracts the number after min_hours:
-        if total_hours < min_hours:
-            for e in available_electives:
-                if all(prerequisite in course for prerequisite in prerequisites.get(e, [])):
-                    next_semester_courses.append(e)
-                    total_hours += credit_hours[e]
-                    if total_hours >= 18:
-                        break
+    # Check if the user requested a minimum number of hours
+    if "min_hours" in notes.lower():
+        try:
+            min_hours = int(notes.lower().split("min_hours:")[1].split()[0])
+            if total_hours < min_hours:
+                for e in available_electives:
+                    if all(prerequisite in course for prerequisite in prerequisites.get(e, [])):
+                        next_semester_courses.append(e)
+                        total_hours += credit_hours[e]
+                        if total_hours >= 18:
+                            break
+        except (IndexError, ValueError):
+            return {"error": "Invalid format for min_hours in notes."}
 
     return {"courses": next_semester_courses, "total_hours": total_hours}
 
@@ -97,22 +104,18 @@ def generate_graduation_plan(
     course_data: Dict
 ) -> str:
     """Generates a graduation plan."""
-    
-    remaining_courses = course_data[major]["required"].copy()
-    remaining_courses.extend(course_data[major]["electives"].copy())
 
-    for c in course:
-        if c in remaining_courses:
-            remaining_courses.remove(c)
-            
+    remaining_courses = course_data[major]["required"] + course_data[major]["electives"]
+    remaining_courses = [c for c in remaining_courses if c not in course]
+    
     prompt = f"""
     Given the student's degree: {degree}, major: {major}, minor: {minor}, courses taken: {course}, graduation month and year: {graduation.strftime('%Y-%m')}, and notes: {notes}, create a graduation plan.
 
     Remaining courses: {remaining_courses}
 
-    Include a semester by semester plan, and include the amount of credit hours for each semester.
+    Include a semester-by-semester plan, and list the number of credit hours for each semester.
     """
-    
+
     response = model.generate_content(prompt)
     return response.text
 
@@ -153,29 +156,30 @@ pdf_path = "pvcoursedata.pdf"
 course_data = extract_course_data_from_pdf(pdf_path)
 
 def process_frontend_input(frontend_data):
-
-    if course_data:
-        degree = frontend_data.get('degree')
-        major = frontend_data.get('major')
-        minor = frontend_data.get('minor')
-        course_list = frontend_data.get('course')
-        graduation_str = frontend_data.get('graduation')
-        notes = frontend_data.get('notes')
-
-        try:
-            graduation = datetime.datetime.strptime(graduation_str, "%Y-%m").date()
-        except ValueError:
-            return "Invalid date format. Please use犃-MM."
-
-        try:
-            recommendations = get_course_recommendations(degree, major, minor, course_list, graduation, notes, course_data)
-            return recommendations
-        except Exception as e:
-            return f"An error occurred: {e}"
-    else:
+    """Processes input from the frontend and returns course recommendations."""
+    
+    if not course_data:
         return "Failed to extract course data from PDF."
 
-# Example of how to use it with data from a frontend (replace with your actual frontend data):
+    degree = frontend_data.get('degree')
+    major = frontend_data.get('major')
+    minor = frontend_data.get('minor')
+    course_list = frontend_data.get('course')
+    graduation_str = frontend_data.get('graduation')
+    notes = frontend_data.get('notes')
+
+    try:
+        graduation = datetime.datetime.strptime(graduation_str, "%Y-%m").date()
+    except ValueError:
+        return "Invalid date format. Please use YYYY-MM."
+
+    try:
+        recommendations = get_course_recommendations(degree, major, minor, course_list, graduation, notes, course_data)
+        return recommendations
+    except Exception as e:
+        return f"An error occurred: {e}"
+
+# Example frontend input:
 frontend_data = {
     'degree': 'Bachelor of Science',
     'major': 'Computer Science',
@@ -185,5 +189,6 @@ frontend_data = {
     'notes': 'min_hours: 15',
 }
 
+# Run and print response
 chat_response = process_frontend_input(frontend_data)
 print(chat_response)
