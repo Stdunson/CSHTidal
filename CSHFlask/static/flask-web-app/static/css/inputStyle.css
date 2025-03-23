@@ -17,6 +17,8 @@ input[type="text"], textarea {
 }
 button {
     padding: 10px 15px;
+    width: 150px;
+    text-align: center;
     background-color: #663399;
     color: white;
     border: none;
@@ -31,6 +33,11 @@ button:hover {
 button[type="submit"] {
     margin-top: 0px;
 }
+
 h1 {
+    margin-bottom: 0px;
+    color: #663399;
+    font-size: 3rem;
+    font-weight: bolder;
     text-align: center;
 }

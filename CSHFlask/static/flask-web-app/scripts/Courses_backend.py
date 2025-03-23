@@ -55,7 +55,6 @@ def extract_course_data_from_pdf(pdf_path: str) -> Dict:
             match = re.match(r"([A-Z]{4})\s+(\d{4})", line)
             if match:
                 course_tag = match.group(1)
-                print(f"Match found: {match.groups()}")
                 if course_tag in course_tags:
                     course_code = f"{match.group(1)} {match.group(2)}"
                     prerequisites = re.findall(r"Prerequisites?: ([A-Z]{4} \d{4})", line)
@@ -86,10 +85,24 @@ def get_course_recommendations(
     
     prompt_for_chat = f"""
     The student's major is: {major}, and they're pursuing a {degree} degree. They have taken the following courses: {course}.
-    Based on this information, recommend the next semester's courses and provide a graduation plan. Give specifically what courses the student should take each term, and if there's an elective, then mention which elective(ex. creative arts core, COMP elective, etc). PVAMU's courses are listed here: {course_data}
-    The student's notes are: {notes}. It is currently Spring 2025 and they want to graduate by {graduation}.
+    Based on this information, recommend the next semester's courses and provide a graduation plan. Give specifically what courses the student should take each term, and if there's an elective, then mention which elective(ex. creative arts core, COMP elective, etc). PVAMU's courses are listed here: {course_data}, make sure course names and numbers are accurate to this data. As a tip, second digit is same as # of credit hours.
+    The student's notes are: {notes}. It is currently Spring 2025 and they want to graduate by {graduation}. 
 
-    Format the response as if you are a helpful academic advisor in a chat box.
+    Format the response as if you are a helpful academic advisor in a chat box. Start the response with what the student should take next semester, then after that pivot to the student's full degree plan.
+    
+    For next semester, put it in a bullet point format, like so, but catered towards user's needs:
+    Fall 2025
+    - COMP 2336: Data Structures(3)
+    - MATH 2414: Calculus 2(4)
+    - CHEM 1303: Inorganic Chemistry(3)
+    - CHEM 1111: Chemistry Lab(1)
+    - COMP 2310: Discrete Structures(3)
+    Total Credit Hours: 14
+
+    For the full degree plan, format each semester like so, but catered towards the user's needs:
+    Fall 2025: COMP 2336: Data Structures, MATH 2414: Calculus 2, COMP 2310: Discrete Structures, CHEM 1303: Inorganic Chemistry, CHEM 1111: Chemistry Lab 1
+    Total Credit Hours: 14
+
     Then, at the end of your response, ask if any adjustments need to be made to the course selection.
     """
 
@@ -102,7 +115,7 @@ def process_frontend_input(frontend_data):
     """Processes input from the frontend and returns course recommendations."""
     
     # Extract course data from PDF
-    course_data = extract_course_data_from_pdf('/Users/hameedalatishe/Documents/GitHub/CSHTidal/CSHFlask/static/flask-web-app/static/pdfs/pvcoursedata.pdf')  # Fixed PDF path
+    course_data = extract_course_data_from_pdf('/Users/ShavaughnDunson/Documents/Code/CSHTidal/CSHFlask/static/flask-web-app/static/pdfs/pvcoursedata.pdf')
     if not course_data:
         return "Failed to extract course data from PDF."
 

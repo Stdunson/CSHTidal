@@ -12,19 +12,22 @@ body {
 
 h1 {
     margin-bottom: 0px;
-    
+    color: #663399;
+    font-size: 3rem;
+    font-weight: bolder;
 }
 
 p {
     margin-bottom: 20px;
     max-width: 600px;
+    text-align: center;
 }
 
 img {
     max-width: 60%;
     height: auto;
-    margin-bottom: 20px;
-    border-radius: 5px;
+    margin-bottom: 5px;
+    border-radius: 20px;
 }
 
 button {
@@ -39,5 +42,5 @@ button {
 }
 
 button:hover {
-    background-color: #4B0082;
+    background-color: #150f19;
 }

@@ -6,11 +6,14 @@ body {
     background-color: #E6E0F8;
 }
 h1 {
-    color: #333;
+    margin-bottom: 0px;
+    color: #663399;
+    font-size: 3rem;
+    font-weight: bolder;
 }
 textarea {
     width: 90%;
-    height: 150px;
+    height: 400px;
     margin: 0 auto 20px auto;
     padding: 10px;
     font-size: 16px;

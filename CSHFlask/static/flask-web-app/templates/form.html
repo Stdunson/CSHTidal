@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Page</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/outputStyle.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inputStyle.css') }}">
 </head>
 <body>
     <h1>Enter Your Data</h1>
@@ -22,7 +22,7 @@
             <input type="text" id="minor" name="minor" placeholder="Optional">
         </div>
         <div class="form-group">
-            <label>What courses have you taken:</label>
+            <label>Courses you have taken:</label>
             <div id="courses">
                 <input type="text" name="course[]" placeholder="Course number (e.g., COMP 2310)">
             </div>
