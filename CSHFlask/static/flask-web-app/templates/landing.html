@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV PathFinder</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/landingStyle.css')}}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to PV PathFinder</h1>
+        <p>The online advising service for PVAMU students</p>
+    </header>
+    <main>
+        <img src="{{ url_for('static', filename='images/pathfinderLogo.png') }}" alt="PV Pathfinder Logo" />
+        <br>
+        <form action="{{ url_for('main.getstarted') }}" method="post">
+            <button>Get Started</button>
+        </form>
+        <br>
+        <form action="{{ url_for('main.signin') }}" method="post">
+            <button>Sign In</button>
+        </form>
+        <button>Sign In</button>
+    </main>
+    <footer>
+        <p>&copy; 2025 team CSH</p>
+    </footer>
+</body>
+</html>
