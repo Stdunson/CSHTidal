@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')
 
 # Configure API Key
-GOOGLE_API_KEY = 'AIzaSyCAudQfhOAC0Tvdq7Im75lVfIRdjnDfpjI'
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
